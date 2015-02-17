@@ -58,7 +58,7 @@ public class ColorCompareView extends View {
         }
     }
 
-    public void setBackColor(int color) {
+    public void setOldColor(int color) {
         mBackPaint.setColor(color);
         invalidate();
     }

@@ -1,7 +1,7 @@
 <ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,10 +21,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:padding="8dp"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -33,8 +33,8 @@
                 android:gravity="center_vertical"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp"
-                android:textAllCaps="true"
                 android:text="@string/hex_label"
+                android:textAllCaps="true"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textColor="?android:textColorPrimary"
                 android:textStyle="bold"/>
@@ -43,8 +43,8 @@
                 android:id="@+id/color_hex"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:layout_weight="0"
+                android:gravity="center_vertical"
                 android:maxLength="8"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp"
@@ -54,39 +54,43 @@
 
             <Space
                 android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
 
             <me.uucky.colorpicker.ColorCompareView
-                android:layout_weight="0"
-                android:layout_width="wrap_content"
                 android:id="@+id/color_compare"
-                android:layout_height="32dp"/>
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_weight="0"/>
         </LinearLayout>
 
         <SeekBar
             android:id="@+id/hue_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginTop="12dp"
+            android:max="360"/>
 
         <SeekBar
             android:id="@+id/saturation_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginTop="12dp"
+            android:max="256"/>
 
         <SeekBar
             android:id="@+id/value_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginTop="12dp"
+            android:max="256"/>
 
         <SeekBar
             android:id="@+id/alpha_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginTop="12dp"
+            android:max="256"/>
 
     </LinearLayout>
 </ScrollView>

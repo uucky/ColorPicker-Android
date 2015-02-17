@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Paint.Cap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -27,6 +28,8 @@ public abstract class ColorBarDrawable extends Drawable {
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         final float density = resources.getDisplayMetrics().density;
+        mBackgroundPaint.setStrokeCap(Cap.ROUND);
+        mPaint.setStrokeCap(Cap.ROUND);
         mBackgroundPaint.setStrokeWidth(density * 3);
         mPaint.setStrokeWidth(density * 3);
         mBounds = new RectF();
