@@ -39,6 +39,8 @@ public class ColorPickerDialogFragment extends DialogFragment {
         if (backgroundDrawable instanceof ColorDrawable) {
             dialog.setInitialColor(((ColorDrawable) backgroundDrawable).getColor());
         }
+//        dialog.setPresetsEnabled(false);
+        dialog.setAlphaEnabled(false);
         dialog.setPositiveButton(getString(android.R.string.ok), new ColorPickerListener() {
             @Override
             public void onClick(ColorPickerDialog dialog, int color) {

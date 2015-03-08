@@ -120,6 +120,7 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
                 LinearLayoutManager.HORIZONTAL, false));
         colorPresetsView.setAdapter(colorsAdapter);
         setOnShowListener(this);
+        setColor(Color.WHITE);
     }
 
     public void addColor(int... colors) {
