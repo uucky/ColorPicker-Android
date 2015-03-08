@@ -34,14 +34,14 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
     public ColorPickerDialog(Context context) {
         super(context);
         final LayoutInflater inflater = LayoutInflater.from(context);
-        final View view = inflater.inflate(R.layout.dialog_color_picker, null);
+        final View view = inflater.inflate(R.layout.cp__dialog_color_picker, null);
         setView(view);
         colorsAdapter = new ColorsAdapter(this, getContext());
         colorPresetsView = (RecyclerView) view.findViewById(R.id.color_presets);
-        hueSeekBar = (SeekBar) view.findViewById(R.id.color_picker_hue_seekbar);
-        saturationSeekBar = (SeekBar) view.findViewById(R.id.color_picker_saturation_seekbar);
-        valueSeekBar = (SeekBar) view.findViewById(R.id.color_picker_value_seekbar);
-        alphaSeekBar = (SeekBar) view.findViewById(R.id.color_picker_alpha_seekbar);
+        hueSeekBar = (SeekBar) view.findViewById(R.id.hue_seekbar);
+        saturationSeekBar = (SeekBar) view.findViewById(R.id.saturation_seekbar);
+        valueSeekBar = (SeekBar) view.findViewById(R.id.value_seekbar);
+        alphaSeekBar = (SeekBar) view.findViewById(R.id.alpha_seekbar);
         editHexColor = (EditText) view.findViewById(R.id.color_hex);
         colorCompare = (ColorCompareView) view.findViewById(R.id.color_compare);
         final Resources res = getContext().getResources();
@@ -302,7 +302,7 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
 
         @Override
         public ColorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            final View view = mInflater.inflate(R.layout.adapter_item_color_picker_preset, parent, false);
+            final View view = mInflater.inflate(R.layout.cp__adapter_item_color_picker_preset, parent, false);
             return new ColorViewHolder(view, this, mDialog);
         }
 

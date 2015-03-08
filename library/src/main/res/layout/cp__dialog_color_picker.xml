@@ -63,28 +63,28 @@
         </LinearLayout>
 
         <SeekBar
-            android:id="@+id/color_picker_hue_seekbar"
+            android:id="@+id/hue_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:max="360"/>
 
         <SeekBar
-            android:id="@+id/color_picker_saturation_seekbar"
+            android:id="@+id/saturation_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:max="255"/>
 
         <SeekBar
-            android:id="@+id/color_picker_value_seekbar"
+            android:id="@+id/value_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:max="255"/>
 
         <SeekBar
-            android:id="@+id/color_picker_alpha_seekbar"
+            android:id="@+id/alpha_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
