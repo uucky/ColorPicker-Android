@@ -38,10 +38,10 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         setView(view);
         colorsAdapter = new ColorsAdapter(this, getContext());
         colorPresetsView = (RecyclerView) view.findViewById(R.id.color_presets);
-        hueSeekBar = (SeekBar) view.findViewById(R.id.hue_seekbar);
-        saturationSeekBar = (SeekBar) view.findViewById(R.id.saturation_seekbar);
-        valueSeekBar = (SeekBar) view.findViewById(R.id.value_seekbar);
-        alphaSeekBar = (SeekBar) view.findViewById(R.id.alpha_seekbar);
+        hueSeekBar = (SeekBar) view.findViewById(R.id.color_picker_hue_seekbar);
+        saturationSeekBar = (SeekBar) view.findViewById(R.id.color_picker_saturation_seekbar);
+        valueSeekBar = (SeekBar) view.findViewById(R.id.color_picker_value_seekbar);
+        alphaSeekBar = (SeekBar) view.findViewById(R.id.color_picker_alpha_seekbar);
         editHexColor = (EditText) view.findViewById(R.id.color_hex);
         colorCompare = (ColorCompareView) view.findViewById(R.id.color_compare);
         final Resources res = getContext().getResources();
