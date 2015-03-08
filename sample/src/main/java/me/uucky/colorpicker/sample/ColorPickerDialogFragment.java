@@ -17,27 +17,27 @@ import me.uucky.colorpicker.ColorPickerDialog.ColorPickerListener;
  * Created by mariotaku on 15/2/15.
  */
 public class ColorPickerDialogFragment extends DialogFragment {
+
+
+    private final static int[] COLORS = {R.color.material_red, R.color.material_pink,
+            R.color.material_purple, R.color.material_deep_purple, R.color.material_indigo,
+            R.color.material_blue, R.color.material_light_blue, R.color.material_cyan,
+            R.color.material_teal, R.color.material_green, R.color.material_light_green,
+            R.color.material_lime, R.color.material_yellow, R.color.material_amber,
+            R.color.material_orange, R.color.material_deep_orange};
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final ColorPickerDialog dialog = new ColorPickerDialog(getActivity());
         final Resources res = getResources();
-        dialog.addColor(res.getColor(R.color.material_red));
-        dialog.addColor(res.getColor(R.color.material_pink));
-        dialog.addColor(res.getColor(R.color.material_purple));
-        dialog.addColor(res.getColor(R.color.material_indigo));
-        dialog.addColor(res.getColor(R.color.material_blue));
-        dialog.addColor(res.getColor(R.color.material_cyan));
-        dialog.addColor(res.getColor(R.color.material_green));
-        dialog.addColor(res.getColor(R.color.material_lime));
-        dialog.addColor(res.getColor(R.color.material_yellow));
-        dialog.addColor(res.getColor(R.color.material_amber));
-        dialog.addColor(res.getColor(R.color.material_orange));
-        dialog.addColor(res.getColor(R.color.material_deep_orange));
+        for (int color : COLORS) {
+            dialog.addColor(res.getColor(color));
+        }
         final Activity activity = getActivity();
         final View colorView = activity.findViewById(R.id.color_view);
         final Drawable backgroundDrawable = colorView.getBackground();
         if (backgroundDrawable instanceof ColorDrawable) {
-            dialog.setColor(((ColorDrawable) backgroundDrawable).getColor());
+            dialog.setInitialColor(((ColorDrawable) backgroundDrawable).getColor());
         }
         dialog.setPositiveButton(getString(android.R.string.ok), new ColorPickerListener() {
             @Override

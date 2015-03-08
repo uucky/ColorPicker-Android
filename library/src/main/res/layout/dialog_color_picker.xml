@@ -9,14 +9,12 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <GridView
-            android:id="@+id/colors_grid"
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/color_presets"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:horizontalSpacing="8dp"
-            android:listSelector="@android:color/transparent"
-            android:numColumns="6"
-            android:verticalSpacing="8dp"/>
+            android:layout_height="48dp"
+            android:spacing="0dp"/>
 
 
         <LinearLayout
@@ -44,11 +42,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
+                android:minWidth="72dp"
                 android:gravity="center_vertical"
-                android:maxLength="8"
                 android:paddingBottom="8dp"
+                android:maxLength="8"
                 android:paddingTop="8dp"
-                android:textAllCaps="true"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textColor="?android:textColorPrimary"/>
 
@@ -76,21 +74,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:max="256"/>
+            android:max="255"/>
 
         <SeekBar
             android:id="@+id/value_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:max="256"/>
+            android:max="255"/>
 
         <SeekBar
             android:id="@+id/alpha_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:max="256"/>
+            android:max="255"/>
 
     </LinearLayout>
 </ScrollView>

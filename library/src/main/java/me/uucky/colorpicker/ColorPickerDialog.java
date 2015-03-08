@@ -6,26 +6,27 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnShowListener;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by mariotaku on 15/2/15.
  */
 public class ColorPickerDialog extends AlertDialog implements OnShowListener {
 
-    private final ColorsGridAdapter colorsAdapter;
+    private final ColorsAdapter colorsAdapter;
 
-    private GridView colorsGridView;
+    private RecyclerView colorPresetsView;
     private EditText editHexColor;
     private SeekBar hueSeekBar, saturationSeekBar, valueSeekBar, alphaSeekBar;
     private ColorCompareView colorCompare;
@@ -35,8 +36,8 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.dialog_color_picker, null);
         setView(view);
-        colorsAdapter = new ColorsGridAdapter(getContext());
-        colorsGridView = (GridView) view.findViewById(R.id.colors_grid);
+        colorsAdapter = new ColorsAdapter(this, getContext());
+        colorPresetsView = (RecyclerView) view.findViewById(R.id.color_presets);
         hueSeekBar = (SeekBar) view.findViewById(R.id.hue_seekbar);
         saturationSeekBar = (SeekBar) view.findViewById(R.id.saturation_seekbar);
         valueSeekBar = (SeekBar) view.findViewById(R.id.value_seekbar);
@@ -115,7 +116,9 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
             }
         });
 
-        colorsGridView.setAdapter(colorsAdapter);
+        colorPresetsView.setLayoutManager(new LinearLayoutManager(context,
+                LinearLayoutManager.HORIZONTAL, false));
+        colorPresetsView.setAdapter(colorsAdapter);
         setOnShowListener(this);
     }
 
@@ -136,8 +139,17 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         return Color.HSVToColor(alpha, new float[]{hue, saturation, value});
     }
 
-    public void setColor(int color) {
+    public void setInitialColor(int color) {
         colorCompare.setOldColor(color);
+        setAlpha(Color.alpha(color));
+        final float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        setHue(hsv[0]);
+        setSaturation(hsv[1]);
+        setValue(hsv[2]);
+    }
+
+    public void setColor(int color) {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
         setHue(hsv[0]);
@@ -211,6 +223,7 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         }
         colorCompare.setFrontColor(color);
         alphaDrawable.setColor(color);
+        colorsAdapter.setCurrentColor(color);
     }
 
     private void updateHuePreview() {
@@ -230,49 +243,6 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         void onClick(ColorPickerDialog dialog, int color);
     }
 
-    private static class ColorsGridAdapter extends BaseAdapter {
-        private final LayoutInflater mInflater;
-        private List<Integer> mColors = new ArrayList<>();
-
-        public ColorsGridAdapter(Context context) {
-            mInflater = LayoutInflater.from(context);
-        }
-
-        public void add(int color) {
-            mColors.add(color);
-            notifyDataSetChanged();
-        }
-
-        public void addAll(int[] colors) {
-            for (int color : colors) {
-                mColors.add(color);
-            }
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getCount() {
-            return mColors.size();
-        }
-
-        @Override
-        public Integer getItem(int position) {
-            return mColors.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final View view = convertView != null ? convertView : mInflater.inflate(R.layout.grid_item_color, parent, false);
-            view.setBackgroundColor(getItem(position));
-            return view;
-        }
-    }
-
     private static class InternalClickListener implements DialogInterface.OnClickListener {
 
         private final ColorPickerListener listener;
@@ -286,6 +256,85 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
             if (listener == null) return;
             final ColorPickerDialog colorPickerDialog = ((ColorPickerDialog) dialog);
             listener.onClick(colorPickerDialog, colorPickerDialog.getColor());
+        }
+    }
+
+    public void setPresetsEnabled(boolean enabled) {
+        colorPresetsView.setVisibility(enabled ? View.VISIBLE : View.GONE);
+    }
+
+
+    private static class ColorsAdapter extends Adapter<ColorViewHolder> {
+
+        private final ColorPickerDialog mDialog;
+        private final LayoutInflater mInflater;
+        private final ArrayList<Integer> mColors;
+        private int mCurrentColor;
+
+        public ColorsAdapter(ColorPickerDialog dialog, final Context context) {
+            mColors = new ArrayList<>();
+            mDialog = dialog;
+            mInflater = LayoutInflater.from(context);
+        }
+
+        public void addAll(int... colors) {
+            for (int color : colors) {
+                mColors.add(color);
+            }
+            notifyDataSetChanged();
+        }
+
+        public int getColor(int position) {
+            return mColors.get(position);
+        }
+
+        public void setCurrentColor(final int color) {
+            mCurrentColor = color;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onBindViewHolder(ColorViewHolder holder, int position) {
+            final int color = mColors.get(position);
+            holder.setItem(position, color, mCurrentColor == color);
+        }
+
+        @Override
+        public ColorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            final View view = mInflater.inflate(R.layout.adapter_item_color_picker_preset, parent, false);
+            return new ColorViewHolder(view, this, mDialog);
+        }
+
+
+        @Override
+        public int getItemCount() {
+            return mColors.size();
+        }
+
+    }
+
+    public static class ColorViewHolder extends ViewHolder implements View.OnClickListener {
+
+        private final View colorView;
+        private final ColorsAdapter mAdapter;
+        private final ColorPickerDialog mDialog;
+
+        public ColorViewHolder(View itemView, ColorsAdapter adapter, ColorPickerDialog dialog) {
+            super(itemView);
+            mAdapter = adapter;
+            mDialog = dialog;
+            itemView.setOnClickListener(this);
+            colorView = itemView.findViewById(R.id.color);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mDialog.setColor(mAdapter.getColor(getPosition()));
+        }
+
+        public void setItem(int position, int color, boolean activated) {
+            colorView.setBackgroundColor(color);
+            colorView.setActivated(activated);
         }
     }
 }
