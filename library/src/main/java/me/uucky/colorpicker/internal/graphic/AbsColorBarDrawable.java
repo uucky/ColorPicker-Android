@@ -1,4 +1,4 @@
-package me.uucky.colorpicker;
+package me.uucky.colorpicker.internal.graphic;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -14,7 +14,7 @@ import android.graphics.drawable.Drawable;
 /**
  * Created by mariotaku on 15/2/15.
  */
-public abstract class ColorBarDrawable extends Drawable {
+public abstract class AbsColorBarDrawable extends Drawable {
     private final Paint mBackgroundPaint, mPaint;
     private final Resources mResources;
     private RectF mBounds;
@@ -23,7 +23,7 @@ public abstract class ColorBarDrawable extends Drawable {
         return mResources;
     }
 
-    public ColorBarDrawable(Resources resources) {
+    public AbsColorBarDrawable(Resources resources) {
         mResources = resources;
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

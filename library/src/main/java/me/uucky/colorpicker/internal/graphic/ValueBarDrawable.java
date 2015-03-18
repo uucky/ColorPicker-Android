@@ -1,4 +1,4 @@
-package me.uucky.colorpicker;
+package me.uucky.colorpicker.internal.graphic;
 
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -10,10 +10,10 @@ import android.graphics.Shader.TileMode;
 /**
  * Created by mariotaku on 15/2/15.
  */
-public class ValueDrawable extends ColorBarDrawable {
+public class ValueBarDrawable extends AbsColorBarDrawable {
     private float mHue, mSaturation;
 
-    public ValueDrawable(Resources resources) {
+    public ValueBarDrawable(Resources resources) {
         super(resources);
     }
 

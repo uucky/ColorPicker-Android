@@ -17,24 +17,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.uucky.colorpicker;
+package me.uucky.colorpicker.internal;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
-public class SquareView extends View {
+public class SquareRelativeLayout extends RelativeLayout {
 
-    public SquareView(final Context context) {
+    public SquareRelativeLayout(final Context context) {
         this(context, null);
     }
 
-    public SquareView(final Context context, final AttributeSet attrs) {
+    public SquareRelativeLayout(final Context context, final AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public SquareView(final Context context, final AttributeSet attrs, final int defStyle) {
+    public SquareRelativeLayout(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
     }
 

@@ -1,4 +1,4 @@
-package me.uucky.colorpicker;
+package me.uucky.colorpicker.internal;
 
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -7,10 +7,12 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 
+import me.uucky.colorpicker.internal.graphic.AbsColorBarDrawable;
+
 /**
  * Created by mariotaku on 15/2/15.
  */
-public class HueDrawable extends ColorBarDrawable {
+public class HueDrawable extends AbsColorBarDrawable {
     public HueDrawable(Resources resources) {
         super(resources);
     }

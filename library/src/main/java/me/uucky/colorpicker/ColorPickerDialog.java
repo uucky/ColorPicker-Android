@@ -10,6 +10,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,17 +21,25 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import java.util.ArrayList;
 
+import me.uucky.colorpicker.internal.CheckableColorView;
+import me.uucky.colorpicker.internal.ColorView;
+import me.uucky.colorpicker.internal.HueDrawable;
+import me.uucky.colorpicker.internal.graphic.AlphaBarDrawable;
+import me.uucky.colorpicker.internal.graphic.SaturationBarDrawable;
+import me.uucky.colorpicker.internal.graphic.ValueBarDrawable;
+
 /**
  * Created by mariotaku on 15/2/15.
  */
-public class ColorPickerDialog extends AlertDialog implements OnShowListener {
+@SuppressWarnings("unused")
+public final class ColorPickerDialog extends AlertDialog implements OnShowListener {
 
     private final ColorsAdapter colorsAdapter;
 
     private RecyclerView colorPresetsView;
     private EditText editHexColor;
     private SeekBar hueSeekBar, saturationSeekBar, valueSeekBar, alphaSeekBar;
-    private ColorCompareView colorCompare;
+    private ColorView oldColorView, newColorView;
 
     public ColorPickerDialog(Context context) {
         super(context);
@@ -43,76 +53,48 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         valueSeekBar = (SeekBar) view.findViewById(R.id.value_seekbar);
         alphaSeekBar = (SeekBar) view.findViewById(R.id.alpha_seekbar);
         editHexColor = (EditText) view.findViewById(R.id.color_hex);
-        colorCompare = (ColorCompareView) view.findViewById(R.id.color_compare);
+        oldColorView = (ColorView) view.findViewById(R.id.old_color);
+        newColorView = (ColorView) view.findViewById(R.id.new_color);
+        editHexColor.setFilters(new InputFilter[]{new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                return null;
+            }
+        }});
         final Resources res = getContext().getResources();
         hueSeekBar.setProgressDrawable(new HueDrawable(res));
-        hueSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        hueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) return;
                 updateHuePreview();
                 updateColorPreview();
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
         });
-        saturationSeekBar.setProgressDrawable(new SaturationDrawable(res));
-        saturationSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        saturationSeekBar.setProgressDrawable(new SaturationBarDrawable(res));
+        saturationSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) return;
                 updateSaturationPreview();
                 updateColorPreview();
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
         });
-        valueSeekBar.setProgressDrawable(new ValueDrawable(res));
-        valueSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        valueSeekBar.setProgressDrawable(new ValueBarDrawable(res));
+        valueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) return;
                 updateColorPreview();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
-        alphaSeekBar.setProgressDrawable(new AlphaDrawable(res));
-        alphaSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        alphaSeekBar.setProgressDrawable(new AlphaBarDrawable(res));
+        alphaSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) return;
                 updateColorPreview();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
 
@@ -128,35 +110,17 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
     }
 
     public int getColor() {
-        final int alpha;
-        if (isAlphaEnabled()) {
-            alpha = Math.round((1f - alphaSeekBar.getProgress() / (float) alphaSeekBar.getMax()) * 255f);
-        } else {
-            alpha = 0xff;
-        }
-        final float hue = getHue();
-        final float saturation = getSaturation();
-        final float value = getValue();
-        return Color.HSVToColor(alpha, new float[]{hue, saturation, value});
+        return newColorView.getColor();
     }
 
     public void setInitialColor(int color) {
-        colorCompare.setOldColor(color);
-        setAlpha(Color.alpha(color));
-        final float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        setHue(hsv[0]);
-        setSaturation(hsv[1]);
-        setValue(hsv[2]);
+        oldColorView.setColor(color);
+        newColorView.setColor(color);
     }
 
     public void setColor(int color) {
-        float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        setHue(hsv[0]);
-        setSaturation(hsv[1]);
-        setValue(hsv[2]);
-        setAlpha(Color.alpha(color));
+        newColorView.setColor(color);
+        colorsAdapter.setCurrentColor(color);
     }
 
     @Override
@@ -215,28 +179,28 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
     }
 
     private void updateColorPreview() {
-        final AlphaDrawable alphaDrawable = (AlphaDrawable) alphaSeekBar.getProgressDrawable();
+        final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
         final int color = getColor();
         if (isAlphaEnabled()) {
             editHexColor.setText(String.format("%08x", color));
         } else {
             editHexColor.setText(String.format("%06x", color & 0x00FFFFFF));
         }
-        colorCompare.setFrontColor(color);
+        newColorView.setColor(color);
         alphaDrawable.setColor(color);
         colorsAdapter.setCurrentColor(color);
     }
 
     private void updateHuePreview() {
-        final SaturationDrawable saturationDrawable = (SaturationDrawable) saturationSeekBar.getProgressDrawable();
-        final ValueDrawable valueDrawable = (ValueDrawable) valueSeekBar.getProgressDrawable();
+        final SaturationBarDrawable saturationDrawable = (SaturationBarDrawable) saturationSeekBar.getProgressDrawable();
+        final ValueBarDrawable valueDrawable = (ValueBarDrawable) valueSeekBar.getProgressDrawable();
         final float hue = getHue();
         valueDrawable.setHue(hue);
         saturationDrawable.setHue(hue);
     }
 
     private void updateSaturationPreview() {
-        final ValueDrawable valueDrawable = (ValueDrawable) valueSeekBar.getProgressDrawable();
+        final ValueBarDrawable valueDrawable = (ValueBarDrawable) valueSeekBar.getProgressDrawable();
         valueDrawable.setSaturation(getSaturation());
     }
 
@@ -297,7 +261,14 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
         @Override
         public void onBindViewHolder(ColorViewHolder holder, int position) {
             final int color = mColors.get(position);
-            holder.setItem(position, color, mCurrentColor == color);
+            holder.setColor(color);
+            holder.setChecked(mCurrentColor == color, true);
+        }
+
+        @Override
+        public void onViewRecycled(ColorViewHolder holder) {
+            holder.setChecked(false, false);
+            super.onViewRecycled(holder);
         }
 
         @Override
@@ -316,7 +287,7 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
 
     public static class ColorViewHolder extends ViewHolder implements View.OnClickListener {
 
-        private final View colorView;
+        private final CheckableColorView colorView;
         private final ColorsAdapter mAdapter;
         private final ColorPickerDialog mDialog;
 
@@ -325,17 +296,37 @@ public class ColorPickerDialog extends AlertDialog implements OnShowListener {
             mAdapter = adapter;
             mDialog = dialog;
             itemView.setOnClickListener(this);
-            colorView = itemView.findViewById(R.id.color);
+            colorView = (CheckableColorView) itemView.findViewById(R.id.item_color);
         }
 
         @Override
         public void onClick(View v) {
-            mDialog.setColor(mAdapter.getColor(getPosition()));
+            mDialog.setColor(mAdapter.getColor(getAdapterPosition()));
         }
 
-        public void setItem(int position, int color, boolean activated) {
-            colorView.setBackgroundColor(color);
-            colorView.setActivated(activated);
+        public void setChecked(boolean checked, boolean animate) {
+            colorView.setChecked(checked, animate);
+        }
+
+        public void setColor(int color) {
+            colorView.setColor(color);
+        }
+    }
+
+    private static class AbsOnSeekBarChangeListener implements OnSeekBarChangeListener {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
         }
     }
 }

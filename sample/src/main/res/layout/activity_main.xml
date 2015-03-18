@@ -1,4 +1,4 @@
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -6,4 +6,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:onClick="onClick"
-    tools:context=".MainActivity"/>
+    tools:context=".MainActivity">
+
+    <me.uucky.colorpicker.internal.CheckableColorView
+        android:id="@+id/check_view"
+        android:layout_width="96dp"
+        android:padding="16dp"
+        android:background="#0ff"
+        android:layout_gravity="center"
+        android:layout_height="96dp"/>
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_height="wrap_content"/>
+
+
+</FrameLayout>

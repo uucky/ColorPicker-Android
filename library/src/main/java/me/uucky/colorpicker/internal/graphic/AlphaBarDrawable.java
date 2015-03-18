@@ -1,4 +1,4 @@
-package me.uucky.colorpicker;
+package me.uucky.colorpicker.internal.graphic;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -9,13 +9,15 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 
+import me.uucky.colorpicker.internal.Utils;
+
 /**
  * Created by mariotaku on 15/2/15.
  */
-public class AlphaDrawable extends ColorBarDrawable {
+public class AlphaBarDrawable extends AbsColorBarDrawable {
     private int mColor;
 
-    public AlphaDrawable(Resources resources) {
+    public AlphaBarDrawable(Resources resources) {
         super(resources);
     }
 
@@ -28,7 +30,7 @@ public class AlphaDrawable extends ColorBarDrawable {
 
     @Override
     protected Shader generateBackgroundShader(Rect bounds) {
-        final Bitmap bitmap = ColorCompareView.getAlphaPatternBitmap(getResources());
+        final Bitmap bitmap = Utils.getAlphaPatternBitmap(Math.round(getResources().getDisplayMetrics().density * 4));
         return new BitmapShader(bitmap, TileMode.REPEAT, TileMode.REPEAT);
     }
 
