@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ColorView">
-        <attr name="cornerRadius" format="dimension"/>
-        <attr name="viewElevation" format="dimension"/>
+        <attr name="cp_cornerRadius" format="dimension"/>
+        <attr name="cp_elevation" format="dimension"/>
     </declare-styleable>
 </resources>

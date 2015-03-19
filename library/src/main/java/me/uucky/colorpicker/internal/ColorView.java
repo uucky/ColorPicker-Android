@@ -62,8 +62,8 @@ public class ColorView extends View {
         final Bitmap bitmap = Utils.getAlphaPatternBitmap(Math.round(getResources().getDisplayMetrics().density * 8));
         mAlphaPatternPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mAlphaPatternPaint.setShader(new BitmapShader(bitmap, TileMode.REPEAT, TileMode.REPEAT));
-        mRadius = a.getDimension(R.styleable.ColorView_cornerRadius, 0);
-        ViewCompat.setElevation(this, a.getDimension(R.styleable.ColorView_viewElevation, 0));
+        mRadius = a.getDimension(R.styleable.ColorView_cp_cornerRadius, 0);
+        ViewCompat.setElevation(this, a.getDimension(R.styleable.ColorView_cp_elevation, 0));
         a.recycle();
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
             Internal.setOutlineProvider(this);

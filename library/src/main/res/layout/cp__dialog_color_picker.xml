@@ -60,14 +60,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginRight="16dp"
-                    app:cornerRadius="2dp"/>
+                    app:cp_cornerRadius="2dp"/>
 
                 <me.uucky.colorpicker.internal.ColorView
                     android:id="@+id/new_color"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="right"
-                    app:cornerRadius="2dp"/>
+                    app:cp_cornerRadius="2dp"/>
             </FrameLayout>
         </LinearLayout>
 

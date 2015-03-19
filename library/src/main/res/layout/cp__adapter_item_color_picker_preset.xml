@@ -32,6 +32,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:padding="8dp"
-        app:cornerRadius="2dp"/>
+        app:cp_cornerRadius="2dp"/>
 
 </me.uucky.colorpicker.internal.SquareRelativeLayout>
