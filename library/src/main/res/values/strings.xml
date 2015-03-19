@@ -1,3 +1,5 @@
 <resources>
     <string name="hex_label">HEX#</string>
+    <string name="hash">#</string>
+    <string name="invalid_hex_color">Invalid color</string>
 </resources>

@@ -10,8 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputFilter.AllCaps;
+import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +46,7 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
     private SeekBar hueSeekBar, saturationSeekBar, valueSeekBar, alphaSeekBar;
     private ColorView oldColorView, newColorView;
 
-    public ColorPickerDialog(Context context) {
+    public ColorPickerDialog(final Context context) {
         super(context);
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.cp__dialog_color_picker, null);
@@ -55,29 +60,49 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
         editHexColor = (EditText) view.findViewById(R.id.color_hex);
         oldColorView = (ColorView) view.findViewById(R.id.old_color);
         newColorView = (ColorView) view.findViewById(R.id.new_color);
-        editHexColor.setFilters(new InputFilter[]{new InputFilter() {
+        editHexColor.setFilters(new InputFilter[]{
+                new InputFilter.LengthFilter(8),
+                new AllCaps(),
+//                new HexFilter()
+        });
+        editHexColor.addTextChangedListener(new TextWatcher() {
             @Override
-            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                return null;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
-        }});
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    setColor(Color.parseColor("#" + s));
+                    editHexColor.setError(null);
+                } catch (IllegalArgumentException e) {
+                    editHexColor.setError(context.getString(R.string.invalid_hex_color));
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         final Resources res = getContext().getResources();
         hueSeekBar.setProgressDrawable(new HueDrawable(res));
         hueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) return;
+                if (!fromUser) return;
                 updateHuePreview();
-                updateColorPreview();
+                updateColorPreviewFromSeekBars();
             }
         });
         saturationSeekBar.setProgressDrawable(new SaturationBarDrawable(res));
         saturationSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) return;
+                if (!fromUser) return;
                 updateSaturationPreview();
-                updateColorPreview();
+                updateColorPreviewFromSeekBars();
             }
 
         });
@@ -85,16 +110,16 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
         valueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) return;
-                updateColorPreview();
+                if (!fromUser) return;
+                updateColorPreviewFromSeekBars();
             }
         });
         alphaSeekBar.setProgressDrawable(new AlphaBarDrawable(res));
         alphaSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) return;
-                updateColorPreview();
+                if (!fromUser) return;
+                updateColorPreviewFromSeekBars();
             }
         });
 
@@ -115,12 +140,21 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
 
     public void setInitialColor(int color) {
         oldColorView.setColor(color);
-        newColorView.setColor(color);
+        setColor(color);
     }
 
     public void setColor(int color) {
+        if (color == newColorView.getColor()) return;
         newColorView.setColor(color);
         colorsAdapter.setCurrentColor(color);
+        final int alpha = Color.alpha(color);
+        final float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        setHue(hsv[0]);
+        setSaturation(hsv[1]);
+        setValue(hsv[2]);
+        setAlpha(alpha);
+        setColorText(color);
     }
 
     @Override
@@ -178,14 +212,40 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
         alphaSeekBar.setProgress(Math.round(alphaSeekBar.getMax() * (1 - alpha / 255f)));
     }
 
+    private int calculateColor() {
+        final int alpha;
+        if (isAlphaEnabled()) {
+            alpha = Math.round((1f - alphaSeekBar.getProgress() / (float) alphaSeekBar.getMax()) * 255f);
+        } else {
+            alpha = 0xff;
+        }
+        final float hue = getHue();
+        final float saturation = getSaturation();
+        final float value = getValue();
+        return Color.HSVToColor(alpha, new float[]{hue, saturation, value});
+    }
+
     private void updateColorPreview() {
         final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
         final int color = getColor();
+        setColorText(color);
+        newColorView.setColor(color);
+        alphaDrawable.setColor(color);
+        colorsAdapter.setCurrentColor(color);
+    }
+
+    private void setColorText(int color) {
         if (isAlphaEnabled()) {
             editHexColor.setText(String.format("%08x", color));
         } else {
             editHexColor.setText(String.format("%06x", color & 0x00FFFFFF));
         }
+    }
+
+    private void updateColorPreviewFromSeekBars() {
+        final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
+        final int color = calculateColor();
+        setColorText(color);
         newColorView.setColor(color);
         alphaDrawable.setColor(color);
         colorsAdapter.setCurrentColor(color);
@@ -237,6 +297,7 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
         private int mCurrentColor;
 
         public ColorsAdapter(ColorPickerDialog dialog, final Context context) {
+            setHasStableIds(true);
             mColors = new ArrayList<>();
             mDialog = dialog;
             mInflater = LayoutInflater.from(context);
@@ -277,6 +338,10 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
             return new ColorViewHolder(view, this, mDialog);
         }
 
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
 
         @Override
         public int getItemCount() {
@@ -327,6 +392,22 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
 
+        }
+    }
+
+    private static class HexFilter implements InputFilter {
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            if (source == null) return null;
+            final String s = source.toString().replaceAll("[^a-fA-F1-9]", "");
+            if (source instanceof Spanned) {
+                SpannableString sp = new SpannableString(s);
+                TextUtils.copySpansFrom((Spanned) source,
+                        start, end, null, sp, 0);
+                return sp;
+            } else {
+                return s;
+            }
         }
     }
 }

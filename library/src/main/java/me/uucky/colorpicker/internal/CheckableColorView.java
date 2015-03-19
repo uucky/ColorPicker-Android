@@ -17,6 +17,22 @@ public class CheckableColorView extends ColorView implements Checkable {
 
     private static final float BASE_ANGLE = -45;
     private static final float EXTRA_ANGLE = -10;
+    private static final Property<View, Float> CHECKED_PROGRESS = new Property<View, Float>(Float.TYPE, null) {
+        @Override
+        public Float get(View object) {
+            return ((CheckableColorView) object).getCheckedProgress();
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return false;
+        }
+
+        @Override
+        public void set(View object, Float value) {
+            ((CheckableColorView) object).setCheckedProgress(value);
+        }
+    };
 
     private final Paint mPaint;
     private final RectF mTempRect;
@@ -34,22 +50,7 @@ public class CheckableColorView extends ColorView implements Checkable {
 
     public CheckableColorView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mEffectViewHelper = new EffectViewHelper(this, new Property<View, Float>(Float.TYPE, null) {
-            @Override
-            public Float get(View object) {
-                return ((CheckableColorView) object).getCheckedProgress();
-            }
-
-            @Override
-            public boolean isReadOnly() {
-                return false;
-            }
-
-            @Override
-            public void set(View object, Float value) {
-                ((CheckableColorView) object).setCheckedProgress(value);
-            }
-        });
+        mEffectViewHelper = new EffectViewHelper(this, CHECKED_PROGRESS, 150);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTempRect = new RectF();
     }
