@@ -28,7 +28,7 @@ import java.util.ArrayList;
 
 import me.uucky.colorpicker.internal.CheckableColorView;
 import me.uucky.colorpicker.internal.ColorView;
-import me.uucky.colorpicker.internal.HueDrawable;
+import me.uucky.colorpicker.internal.graphic.HueBarDrawable;
 import me.uucky.colorpicker.internal.graphic.AlphaBarDrawable;
 import me.uucky.colorpicker.internal.graphic.SaturationBarDrawable;
 import me.uucky.colorpicker.internal.graphic.ValueBarDrawable;
@@ -87,7 +87,7 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
             }
         });
         final Resources res = getContext().getResources();
-        hueSeekBar.setProgressDrawable(new HueDrawable(res));
+        hueSeekBar.setProgressDrawable(new HueBarDrawable(res));
         hueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
