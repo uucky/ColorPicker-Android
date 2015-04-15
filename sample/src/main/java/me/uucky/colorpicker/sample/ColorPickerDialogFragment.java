@@ -3,6 +3,7 @@ package me.uucky.colorpicker.sample;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -43,7 +44,7 @@ public class ColorPickerDialogFragment extends DialogFragment {
         dialog.setAlphaEnabled(true);
         dialog.setPositiveButton(getString(android.R.string.ok), new ColorPickerListener() {
             @Override
-            public void onClick(ColorPickerDialog dialog, int color) {
+            public void onClick(DialogInterface dialog, int color) {
                 colorView.setBackgroundColor(color);
             }
         });

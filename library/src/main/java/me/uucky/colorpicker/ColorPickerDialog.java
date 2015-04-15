@@ -1,9 +1,9 @@
 package me.uucky.colorpicker;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnShowListener;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,8 +28,8 @@ import java.util.ArrayList;
 
 import me.uucky.colorpicker.internal.CheckableColorView;
 import me.uucky.colorpicker.internal.ColorView;
-import me.uucky.colorpicker.internal.graphic.HueBarDrawable;
 import me.uucky.colorpicker.internal.graphic.AlphaBarDrawable;
+import me.uucky.colorpicker.internal.graphic.HueBarDrawable;
 import me.uucky.colorpicker.internal.graphic.SaturationBarDrawable;
 import me.uucky.colorpicker.internal.graphic.ValueBarDrawable;
 
@@ -37,269 +37,316 @@ import me.uucky.colorpicker.internal.graphic.ValueBarDrawable;
  * Created by mariotaku on 15/2/15.
  */
 @SuppressWarnings("unused")
-public final class ColorPickerDialog extends AlertDialog implements OnShowListener {
+public final class ColorPickerDialog extends AlertDialog {
 
-    private final ColorsAdapter colorsAdapter;
-
-    private RecyclerView colorPresetsView;
-    private EditText editHexColor;
-    private SeekBar hueSeekBar, saturationSeekBar, valueSeekBar, alphaSeekBar;
-    private ColorView oldColorView, newColorView;
+    private final Controller controller;
 
     public ColorPickerDialog(final Context context) {
         super(context);
         final LayoutInflater inflater = LayoutInflater.from(context);
+        @SuppressLint("InflateParams")
         final View view = inflater.inflate(R.layout.cp__dialog_color_picker, null);
         setView(view);
-        colorsAdapter = new ColorsAdapter(this, getContext());
-        colorPresetsView = (RecyclerView) view.findViewById(R.id.color_presets);
-        hueSeekBar = (SeekBar) view.findViewById(R.id.hue_seekbar);
-        saturationSeekBar = (SeekBar) view.findViewById(R.id.saturation_seekbar);
-        valueSeekBar = (SeekBar) view.findViewById(R.id.value_seekbar);
-        alphaSeekBar = (SeekBar) view.findViewById(R.id.alpha_seekbar);
-        editHexColor = (EditText) view.findViewById(R.id.color_hex);
-        oldColorView = (ColorView) view.findViewById(R.id.old_color);
-        newColorView = (ColorView) view.findViewById(R.id.new_color);
-        editHexColor.setFilters(new InputFilter[]{
-                new InputFilter.LengthFilter(8),
-                new AllCaps(),
-//                new HexFilter()
-        });
-        editHexColor.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                try {
-                    setColor(Color.parseColor("#" + s));
-                    editHexColor.setError(null);
-                } catch (IllegalArgumentException e) {
-                    editHexColor.setError(context.getString(R.string.invalid_hex_color));
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-        final Resources res = getContext().getResources();
-        hueSeekBar.setProgressDrawable(new HueBarDrawable(res));
-        hueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!fromUser) return;
-                updateHuePreview();
-                updateColorPreviewFromSeekBars();
-            }
-        });
-        saturationSeekBar.setProgressDrawable(new SaturationBarDrawable(res));
-        saturationSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!fromUser) return;
-                updateSaturationPreview();
-                updateColorPreviewFromSeekBars();
-            }
-
-        });
-        valueSeekBar.setProgressDrawable(new ValueBarDrawable(res));
-        valueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!fromUser) return;
-                updateColorPreviewFromSeekBars();
-            }
-        });
-        alphaSeekBar.setProgressDrawable(new AlphaBarDrawable(res));
-        alphaSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!fromUser) return;
-                updateColorPreviewFromSeekBars();
-            }
-        });
-
-        colorPresetsView.setLayoutManager(new LinearLayoutManager(context,
-                LinearLayoutManager.HORIZONTAL, false));
-        colorPresetsView.setAdapter(colorsAdapter);
-        setOnShowListener(this);
-        setColor(Color.WHITE);
-    }
-
-    public void addColor(int... colors) {
-        colorsAdapter.addAll(colors);
-    }
-
-    public int getColor() {
-        return newColorView.getColor();
+        controller = new Controller(context, view);
+        setOnShowListener(controller);
     }
 
     public void setInitialColor(int color) {
-        oldColorView.setColor(color);
-        setColor(color);
+        controller.setInitialColor(color);
     }
 
     public void setColor(int color) {
-        if (color == newColorView.getColor()) return;
-        newColorView.setColor(color);
-        colorsAdapter.setCurrentColor(color);
-        final int alpha = Color.alpha(color);
-        final float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        setHue(hsv[0]);
-        setSaturation(hsv[1]);
-        setValue(hsv[2]);
-        setAlpha(alpha);
-        setColorText(color);
+        controller.setColor(color);
     }
 
-    @Override
-    public void onShow(DialogInterface dialog) {
-        updateHuePreview();
-        updateSaturationPreview();
-        updateColorPreview();
+    public int getColor() {
+        return controller.getColor();
     }
 
-    public void setNegativeButton(CharSequence text, ColorPickerListener listener) {
-        setButton(BUTTON_NEGATIVE, text, new InternalClickListener(listener));
+    public void addColor(int... colors) {
+        controller.addColor(colors);
     }
 
-    public void setPositiveButton(CharSequence text, ColorPickerListener listener) {
-        setButton(BUTTON_POSITIVE, text, new InternalClickListener(listener));
-    }
-
-    public void setNeutralButton(CharSequence text, ColorPickerListener listener) {
-        setButton(BUTTON_NEUTRAL, text, new InternalClickListener(listener));
-    }
-
-    private float getHue() {
-        return (1 - hueSeekBar.getProgress() / (float) hueSeekBar.getMax()) * 360f;
-    }
-
-    private void setHue(float hue) {
-        hueSeekBar.setProgress(Math.round(hueSeekBar.getMax() * (1 - hue / 360)));
-    }
-
-    private float getSaturation() {
-        return 1 - (saturationSeekBar.getProgress() / (float) saturationSeekBar.getMax());
-    }
-
-    private void setSaturation(float hue) {
-        saturationSeekBar.setProgress(Math.round(saturationSeekBar.getMax() * (1 - hue)));
-    }
-
-    private float getValue() {
-        return 1 - (valueSeekBar.getProgress() / (float) valueSeekBar.getMax());
-    }
-
-    private void setValue(float hue) {
-        valueSeekBar.setProgress(Math.round(valueSeekBar.getMax() * (1 - hue)));
-    }
-
-    private boolean isAlphaEnabled() {
-        return alphaSeekBar.getVisibility() == View.VISIBLE;
-    }
 
     public void setAlphaEnabled(boolean alphaEnabled) {
-        alphaSeekBar.setVisibility(alphaEnabled ? View.VISIBLE : View.GONE);
+        controller.setAlphaEnabled(alphaEnabled);
     }
 
-    private void setAlpha(int alpha) {
-        alphaSeekBar.setProgress(Math.round(alphaSeekBar.getMax() * (1 - alpha / 255f)));
-    }
-
-    private int calculateColor() {
-        final int alpha;
-        if (isAlphaEnabled()) {
-            alpha = Math.round((1f - alphaSeekBar.getProgress() / (float) alphaSeekBar.getMax()) * 255f);
-        } else {
-            alpha = 0xff;
-        }
-        final float hue = getHue();
-        final float saturation = getSaturation();
-        final float value = getValue();
-        return Color.HSVToColor(alpha, new float[]{hue, saturation, value});
-    }
-
-    private void updateColorPreview() {
-        final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
-        final int color = getColor();
-        setColorText(color);
-        newColorView.setColor(color);
-        alphaDrawable.setColor(color);
-        colorsAdapter.setCurrentColor(color);
-    }
-
-    private void setColorText(int color) {
-        if (isAlphaEnabled()) {
-            editHexColor.setText(String.format("%08x", color));
-        } else {
-            editHexColor.setText(String.format("%06x", color & 0x00FFFFFF));
-        }
-    }
-
-    private void updateColorPreviewFromSeekBars() {
-        final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
-        final int color = calculateColor();
-        setColorText(color);
-        newColorView.setColor(color);
-        alphaDrawable.setColor(color);
-        colorsAdapter.setCurrentColor(color);
-    }
-
-    private void updateHuePreview() {
-        final SaturationBarDrawable saturationDrawable = (SaturationBarDrawable) saturationSeekBar.getProgressDrawable();
-        final ValueBarDrawable valueDrawable = (ValueBarDrawable) valueSeekBar.getProgressDrawable();
-        final float hue = getHue();
-        valueDrawable.setHue(hue);
-        saturationDrawable.setHue(hue);
-    }
-
-    private void updateSaturationPreview() {
-        final ValueBarDrawable valueDrawable = (ValueBarDrawable) valueSeekBar.getProgressDrawable();
-        valueDrawable.setSaturation(getSaturation());
+    public void setPresetsEnabled(boolean enabled) {
+        controller.setPresetsEnabled(enabled);
     }
 
     public interface ColorPickerListener {
-        void onClick(ColorPickerDialog dialog, int color);
+        void onClick(DialogInterface dialog, int color);
+    }
+
+
+    public void setNegativeButton(CharSequence text, ColorPickerListener listener) {
+        setButton(BUTTON_NEGATIVE, text, new InternalClickListener(controller, listener));
+    }
+
+    public void setPositiveButton(CharSequence text, ColorPickerListener listener) {
+        setButton(BUTTON_POSITIVE, text, new InternalClickListener(controller, listener));
+    }
+
+    public void setNeutralButton(CharSequence text, ColorPickerListener listener) {
+        setButton(BUTTON_NEUTRAL, text, new InternalClickListener(controller, listener));
+    }
+
+    public final static class Controller implements OnShowListener {
+
+        private final ColorsAdapter colorsAdapter;
+
+        private RecyclerView colorPresetsView;
+        private EditText editHexColor;
+        private SeekBar hueSeekBar, saturationSeekBar, valueSeekBar, alphaSeekBar;
+        private ColorView oldColorView, newColorView;
+
+        public static Controller applyToDialogBuilder(AlertDialog.Builder builder) {
+            final LayoutInflater inflater = LayoutInflater.from(builder.getContext());
+            @SuppressLint("InflateParams")
+            final View view = inflater.inflate(R.layout.cp__dialog_color_picker, null);
+            builder.setView(view);
+            return new Controller(builder.getContext(), view);
+        }
+
+
+        public Controller(final Context context, View view) {
+            colorsAdapter = new ColorsAdapter(this, context);
+            colorPresetsView = (RecyclerView) view.findViewById(R.id.color_presets);
+            hueSeekBar = (SeekBar) view.findViewById(R.id.hue_seekbar);
+            saturationSeekBar = (SeekBar) view.findViewById(R.id.saturation_seekbar);
+            valueSeekBar = (SeekBar) view.findViewById(R.id.value_seekbar);
+            alphaSeekBar = (SeekBar) view.findViewById(R.id.alpha_seekbar);
+            editHexColor = (EditText) view.findViewById(R.id.color_hex);
+            oldColorView = (ColorView) view.findViewById(R.id.old_color);
+            newColorView = (ColorView) view.findViewById(R.id.new_color);
+            editHexColor.setFilters(new InputFilter[]{
+                    new InputFilter.LengthFilter(8),
+                    new AllCaps(),
+//                new HexFilter()
+            });
+            editHexColor.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    try {
+                        setColor(Color.parseColor("#" + s));
+                        editHexColor.setError(null);
+                    } catch (IllegalArgumentException e) {
+                        editHexColor.setError(context.getString(R.string.invalid_hex_color));
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+            final Resources res = context.getResources();
+            hueSeekBar.setProgressDrawable(new HueBarDrawable(res));
+            hueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateHuePreview();
+                    updateColorPreviewFromSeekBars();
+                }
+            });
+            saturationSeekBar.setProgressDrawable(new SaturationBarDrawable(res));
+            saturationSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateSaturationPreview();
+                    updateColorPreviewFromSeekBars();
+                }
+
+            });
+            valueSeekBar.setProgressDrawable(new ValueBarDrawable(res));
+            valueSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateColorPreviewFromSeekBars();
+                }
+            });
+            alphaSeekBar.setProgressDrawable(new AlphaBarDrawable(res));
+            alphaSeekBar.setOnSeekBarChangeListener(new AbsOnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateColorPreviewFromSeekBars();
+                }
+            });
+
+            colorPresetsView.setLayoutManager(new LinearLayoutManager(context,
+                    LinearLayoutManager.HORIZONTAL, false));
+            colorPresetsView.setAdapter(colorsAdapter);
+            setColor(Color.WHITE);
+        }
+
+
+        public void addColor(int... colors) {
+            colorsAdapter.addAll(colors);
+        }
+
+        public int getColor() {
+            return newColorView.getColor();
+        }
+
+        public void setColor(int color) {
+            if (color == newColorView.getColor()) return;
+            newColorView.setColor(color);
+            colorsAdapter.setCurrentColor(color);
+            final int alpha = Color.alpha(color);
+            final float[] hsv = new float[3];
+            Color.colorToHSV(color, hsv);
+            setHue(hsv[0]);
+            setSaturation(hsv[1]);
+            setValue(hsv[2]);
+            setAlpha(alpha);
+            setColorText(color);
+        }
+
+        public void setInitialColor(int color) {
+            oldColorView.setColor(color);
+            setColor(color);
+        }
+
+        @Override
+        public void onShow(DialogInterface dialog) {
+            updateHuePreview();
+            updateSaturationPreview();
+            updateColorPreview();
+        }
+
+        private float getHue() {
+            return (1 - hueSeekBar.getProgress() / (float) hueSeekBar.getMax()) * 360f;
+        }
+
+        private void setHue(float hue) {
+            hueSeekBar.setProgress(Math.round(hueSeekBar.getMax() * (1 - hue / 360)));
+        }
+
+        private float getSaturation() {
+            return 1 - (saturationSeekBar.getProgress() / (float) saturationSeekBar.getMax());
+        }
+
+        private void setSaturation(float hue) {
+            saturationSeekBar.setProgress(Math.round(saturationSeekBar.getMax() * (1 - hue)));
+        }
+
+        private float getValue() {
+            return 1 - (valueSeekBar.getProgress() / (float) valueSeekBar.getMax());
+        }
+
+        private void setValue(float hue) {
+            valueSeekBar.setProgress(Math.round(valueSeekBar.getMax() * (1 - hue)));
+        }
+
+        private boolean isAlphaEnabled() {
+            return alphaSeekBar.getVisibility() == View.VISIBLE;
+        }
+
+        public void setAlphaEnabled(boolean alphaEnabled) {
+            alphaSeekBar.setVisibility(alphaEnabled ? View.VISIBLE : View.GONE);
+        }
+
+        private void setAlpha(int alpha) {
+            alphaSeekBar.setProgress(Math.round(alphaSeekBar.getMax() * (1 - alpha / 255f)));
+        }
+
+        private int calculateColor() {
+            final int alpha;
+            if (isAlphaEnabled()) {
+                alpha = Math.round((1f - alphaSeekBar.getProgress() / (float) alphaSeekBar.getMax()) * 255f);
+            } else {
+                alpha = 0xff;
+            }
+            final float hue = getHue();
+            final float saturation = getSaturation();
+            final float value = getValue();
+            return Color.HSVToColor(alpha, new float[]{hue, saturation, value});
+        }
+
+        private void updateColorPreview() {
+            final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
+            final int color = getColor();
+            setColorText(color);
+            newColorView.setColor(color);
+            alphaDrawable.setColor(color);
+            colorsAdapter.setCurrentColor(color);
+        }
+
+        private void setColorText(int color) {
+            if (isAlphaEnabled()) {
+                editHexColor.setText(String.format("%08x", color));
+            } else {
+                editHexColor.setText(String.format("%06x", color & 0x00FFFFFF));
+            }
+        }
+
+        private void updateColorPreviewFromSeekBars() {
+            final AlphaBarDrawable alphaDrawable = (AlphaBarDrawable) alphaSeekBar.getProgressDrawable();
+            final int color = calculateColor();
+            setColorText(color);
+            newColorView.setColor(color);
+            alphaDrawable.setColor(color);
+            colorsAdapter.setCurrentColor(color);
+        }
+
+        private void updateHuePreview() {
+            final SaturationBarDrawable saturationDrawable = (SaturationBarDrawable) saturationSeekBar.getProgressDrawable();
+            final ValueBarDrawable valueDrawable = (ValueBarDrawable) valueSeekBar.getProgressDrawable();
+            final float hue = getHue();
+            valueDrawable.setHue(hue);
+            saturationDrawable.setHue(hue);
+        }
+
+        private void updateSaturationPreview() {
+            final ValueBarDrawable valueDrawable = (ValueBarDrawable) valueSeekBar.getProgressDrawable();
+            valueDrawable.setSaturation(getSaturation());
+        }
+
+        public void setPresetsEnabled(boolean enabled) {
+            colorPresetsView.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        }
     }
 
     private static class InternalClickListener implements DialogInterface.OnClickListener {
 
+        private final Controller controller;
         private final ColorPickerListener listener;
 
-        InternalClickListener(ColorPickerListener listener) {
+        InternalClickListener(Controller controller, ColorPickerListener listener) {
+            this.controller = controller;
             this.listener = listener;
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
             if (listener == null) return;
-            final ColorPickerDialog colorPickerDialog = ((ColorPickerDialog) dialog);
-            listener.onClick(colorPickerDialog, colorPickerDialog.getColor());
+            listener.onClick(dialog, controller.getColor());
         }
-    }
-
-    public void setPresetsEnabled(boolean enabled) {
-        colorPresetsView.setVisibility(enabled ? View.VISIBLE : View.GONE);
     }
 
 
     private static class ColorsAdapter extends Adapter<ColorViewHolder> {
 
-        private final ColorPickerDialog mDialog;
+        private final Controller mDialogController;
         private final LayoutInflater mInflater;
         private final ArrayList<Integer> mColors;
         private int mCurrentColor;
 
-        public ColorsAdapter(ColorPickerDialog dialog, final Context context) {
+        public ColorsAdapter(Controller dialogController, final Context context) {
             setHasStableIds(true);
             mColors = new ArrayList<>();
-            mDialog = dialog;
+            mDialogController = dialogController;
             mInflater = LayoutInflater.from(context);
         }
 
@@ -335,7 +382,7 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
         @Override
         public ColorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final View view = mInflater.inflate(R.layout.cp__adapter_item_color_picker_preset, parent, false);
-            return new ColorViewHolder(view, this, mDialog);
+            return new ColorViewHolder(view, this, mDialogController);
         }
 
         @Override
@@ -354,19 +401,19 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
 
         private final CheckableColorView colorView;
         private final ColorsAdapter mAdapter;
-        private final ColorPickerDialog mDialog;
+        private final Controller mDialogController;
 
-        public ColorViewHolder(View itemView, ColorsAdapter adapter, ColorPickerDialog dialog) {
+        public ColorViewHolder(View itemView, ColorsAdapter adapter, Controller dialog) {
             super(itemView);
             mAdapter = adapter;
-            mDialog = dialog;
+            mDialogController = dialog;
             itemView.setOnClickListener(this);
             colorView = (CheckableColorView) itemView.findViewById(R.id.item_color);
         }
 
         @Override
         public void onClick(View v) {
-            mDialog.setColor(mAdapter.getColor(getAdapterPosition()));
+            mDialogController.setColor(mAdapter.getColor(getAdapterPosition()));
         }
 
         public void setChecked(boolean checked, boolean animate) {
@@ -410,4 +457,5 @@ public final class ColorPickerDialog extends AlertDialog implements OnShowListen
             }
         }
     }
+
 }
