@@ -211,6 +211,8 @@ public final class ColorPickerDialog extends AlertDialog {
             setValue(hsv[2]);
             setAlpha(alpha);
             setColorText(color);
+            updateHuePreview();
+            updateSaturationPreview();
         }
 
         public void setInitialColor(int color) {
