@@ -188,7 +188,6 @@ public final class ColorPickerDialog extends AlertDialog {
             colorPresetsView.setLayoutManager(new LinearLayoutManager(context,
                     LinearLayoutManager.HORIZONTAL, false));
             colorPresetsView.setAdapter(colorsAdapter);
-            setColor(Color.WHITE);
         }
 
 
@@ -258,6 +257,7 @@ public final class ColorPickerDialog extends AlertDialog {
 
         public void setAlphaEnabled(boolean alphaEnabled) {
             alphaSeekBar.setVisibility(alphaEnabled ? View.VISIBLE : View.GONE);
+            setColorText(getColor());
         }
 
         private void setAlpha(int alpha) {
