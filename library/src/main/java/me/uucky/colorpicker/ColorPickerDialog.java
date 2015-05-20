@@ -34,6 +34,7 @@ import me.uucky.colorpicker.internal.graphic.SaturationBarDrawable;
 import me.uucky.colorpicker.internal.graphic.ValueBarDrawable;
 
 /**
+ * Color Picker Dialog
  * Created by mariotaku on 15/2/15.
  */
 @SuppressWarnings("unused")
@@ -200,7 +201,7 @@ public final class ColorPickerDialog extends AlertDialog {
         }
 
         public void setColor(int color) {
-            if (color == newColorView.getColor()) return;
+            if (newColorView.isColorSet() && color == newColorView.getColor()) return;
             newColorView.setColor(color);
             colorsAdapter.setCurrentColor(color);
             final int alpha = Color.alpha(color);

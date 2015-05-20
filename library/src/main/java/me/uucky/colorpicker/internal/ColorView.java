@@ -45,6 +45,7 @@ public class ColorView extends View {
     private final Paint mAlphaPatternPaint;
     private RectF mRect;
     private float mRadius;
+    private boolean mIsColorSet;
 
     public ColorView(final Context context) {
         this(context, null);
@@ -76,7 +77,12 @@ public class ColorView extends View {
 
     public void setColor(int color) {
         mColorPaint.setColor(color);
+        mIsColorSet = true;
         invalidate();
+    }
+
+    public boolean isColorSet() {
+        return mIsColorSet;
     }
 
     @Override
@@ -90,6 +96,7 @@ public class ColorView extends View {
         canvas.drawRoundRect(mRect, mRadius, mRadius, mColorPaint);
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec), height = MeasureSpec.getSize(heightMeasureSpec);
